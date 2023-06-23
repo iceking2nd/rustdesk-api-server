@@ -13,7 +13,7 @@ import (
 )
 
 func Logout(c *gin.Context) {
-	db := Database.GetDB(c).Session(&gorm.Session{FullSaveAssociations: true}).Debug()
+	db := Database.GetDB(c).Session(&gorm.Session{FullSaveAssociations: true})
 	var token Models.Token
 	err := db.Preload(clause.Associations).Where(&Models.Token{AccessToken: strings.Split(c.Request.Header.Get("Authorization"), " ")[1]}).First(&token).Error
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {

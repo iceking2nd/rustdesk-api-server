@@ -39,7 +39,6 @@ var rootCmd = &cobra.Command{
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
 		//gin.SetMode(gin.ReleaseMode)
-		gin.DisableBindValidation()
 		apiEngine := gin.New()
 		corsConfig := cors.Config{
 			AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"},
@@ -150,11 +149,18 @@ func initConfig() {
 		fmt.Println(err.Error())
 		viper.SetDefault("API.Host", "127.0.0.1")
 		viper.SetDefault("API.Port", 21114)
+		viper.SetDefault("API.PublicURL", "http://127.0.0.1:21114")
 		viper.SetDefault("MySQL.Host", "localhost")
 		viper.SetDefault("MySQL.Port", 3306)
 		viper.SetDefault("MySQL.User", "rustdesk-api-server")
 		viper.SetDefault("MySQL.Pass", "rustdesk-api-server")
 		viper.SetDefault("MySQL.DB", "rustdesk-api-server")
+		viper.SetDefault("SMTP.From", "mail@example.com")
+		viper.SetDefault("SMTP.Name", "Rustdesk")
+		viper.SetDefault("SMTP.Host", "127.0.0.1")
+		viper.SetDefault("SMTP.Port", 587)
+		viper.SetDefault("SMTP.Username", "mail@example.com")
+		viper.SetDefault("SMTP.Password", "")
 
 		if len(cfgFile) > 0 {
 			_ = viper.WriteConfigAs(cfgFile)

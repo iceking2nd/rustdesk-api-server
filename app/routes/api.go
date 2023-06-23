@@ -10,6 +10,9 @@ import (
 
 func apiRoutesRegister(route *gin.RouterGroup) {
 	apiRoutes := route.Group("/api")
+	apiRoutes.POST("/reg", UserController.Reg)
+	apiRoutes.GET("/activate/:token", UserController.Activate)
+	apiRoutes.GET("/resend/:username", UserController.Resend)
 	apiRoutes.POST("/login", UserController.Login)
 	apiRoutes.POST("/logout", UserController.Logout).Use(Auth.TokenAuth())
 	apiRoutes.POST("/currentUser", UserController.CurrentUser).Use(Auth.TokenAuth())
