@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/iceking2nd/rustdesk-api-server/app/Middlewares/Database"
 	"github.com/iceking2nd/rustdesk-api-server/app/routes"
+	"github.com/iceking2nd/rustdesk-api-server/docs"
 	"log"
 	"net/http"
 	"os"
@@ -40,6 +41,7 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		//gin.SetMode(gin.ReleaseMode)
 		apiEngine := gin.New()
+		docs.SwaggerInfo.BasePath = "/api"
 		corsConfig := cors.Config{
 			AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"},
 			AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},

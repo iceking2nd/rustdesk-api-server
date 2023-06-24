@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/iceking2nd/rustdesk-api-server/app/Controllers"
 	"github.com/iceking2nd/rustdesk-api-server/app/Middlewares/Database"
 	"github.com/iceking2nd/rustdesk-api-server/app/Models"
 	"github.com/tidwall/sjson"
@@ -13,6 +14,17 @@ import (
 	"strings"
 )
 
+// Get address book and tags godoc
+// @Summary Get all address book and tags data
+// @Schemes
+// @Description Get all address book and tags data
+// @Tags Address book and tags
+// @Security ApiKeyAuth
+// @Accept json
+// @Produce json
+// @Success 200 {object} Controllers.Response "Response data is a serialized json string"
+// @Failure default {object} Controllers.ResponseError
+// @Router /ab/get [post]
 func Get(c *gin.Context) {
 	var (
 		token Models.Token
@@ -24,24 +36,18 @@ func Get(c *gin.Context) {
 	db := Database.GetDB(c)
 	err := db.Preload(clause.Associations).Where(&Models.Token{AccessToken: strings.Split(c.Request.Header.Get("Authorization"), " ")[1]}).First(&token).Error
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-		c.JSON(http.StatusNotFound, gin.H{
-			"error": "Token已失效，请重新登录",
-		})
+		c.JSON(http.StatusNotFound, Controllers.ResponseError{Error: "Token已失效，请重新登录"})
 		c.Abort()
 		return
 	} else if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": fmt.Sprintf("查询Token数据时出现错误：%s", err.Error()),
-		})
+		c.JSON(http.StatusInternalServerError, Controllers.ResponseError{Error: fmt.Sprintf("查询Token数据时出现错误：%s", err.Error())})
 		c.Abort()
 		return
 	}
 	user = token.User
 	err = db.Where(&Models.Tag{UserID: user.ID}).Find(&tags).Error
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": fmt.Sprintf("获取Tag数据时出现错误：%s", err.Error()),
-		})
+		c.JSON(http.StatusInternalServerError, Controllers.ResponseError{Error: fmt.Sprintf("获取Tag数据时出现错误：%s", err.Error())})
 		c.Abort()
 		return
 	}
@@ -52,18 +58,14 @@ func Get(c *gin.Context) {
 		}
 		data, err = sjson.Set(data, "tags", t)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": fmt.Sprintf("序列化Tag数据时出现错误：%s", err.Error()),
-			})
+			c.JSON(http.StatusInternalServerError, Controllers.ResponseError{Error: fmt.Sprintf("序列化Tag数据时出现错误：%s", err.Error())})
 			c.Abort()
 			return
 		}
 	}
 	err = db.Preload(clause.Associations).Where(&Models.Address{UserID: user.ID}).Find(&addrs).Error
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": fmt.Sprintf("获取地址簿数据时出现错误：%s", err.Error()),
-		})
+		c.JSON(http.StatusInternalServerError, Controllers.ResponseError{Error: fmt.Sprintf("获取地址簿数据时出现错误：%s", err.Error())})
 		c.Abort()
 		return
 	}
@@ -81,13 +83,11 @@ func Get(c *gin.Context) {
 			}
 			data, err = sjson.Set(data, "peers.-1", a)
 			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{
-					"error": fmt.Sprintf("序列化地址簿数据时出现错误：%s", err.Error()),
-				})
+				c.JSON(http.StatusInternalServerError, Controllers.ResponseError{Error: fmt.Sprintf("序列化地址簿数据时出现错误：%s", err.Error())})
 				c.Abort()
 				return
 			}
 		}
 	}
-	c.JSON(http.StatusOK, gin.H{"data": data})
+	c.JSON(http.StatusOK, Controllers.Response{Data: data})
 }

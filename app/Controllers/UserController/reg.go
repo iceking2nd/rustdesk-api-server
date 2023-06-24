@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/iceking2nd/rustdesk-api-server/app/Controllers"
 	"github.com/iceking2nd/rustdesk-api-server/app/Middlewares/Database"
 	"github.com/iceking2nd/rustdesk-api-server/app/Models"
 	"github.com/iceking2nd/rustdesk-api-server/utils/Email"
@@ -19,12 +20,22 @@ type RegRequest struct {
 	Name     string `json:"name" binding:"required"`
 }
 
+// Reg Register godoc
+// @Summary User registration
+// @Schemes
+// @Description Register a new user
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param RegRequest body RegRequest true "Username must be email, password min length is 8, name is required"
+// @Success 204
+// @Failure 400 {object} Controllers.ResponseError
+// @Failure 500 {object} Controllers.ResponseError
+// @Router /reg [post]
 func Reg(c *gin.Context) {
 	var data RegRequest
 	if err := c.ShouldBindJSON(&data); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
+		c.JSON(http.StatusBadRequest, Controllers.ResponseError{Error: err.Error()})
 		return
 	}
 
@@ -32,14 +43,14 @@ func Reg(c *gin.Context) {
 
 	password, err := Hash.StringToSHA512(data.Password)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, Controllers.ResponseError{Error: err.Error()})
 		c.Abort()
 		return
 	}
 	user := Models.User{Username: data.Username, Password: password, Name: data.Name, IsValidated: false}
 	result := db.Create(&user)
 	if result.Error != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": result.Error.Error()})
+		c.JSON(http.StatusBadRequest, Controllers.ResponseError{Error: result.Error.Error()})
 		c.Abort()
 		return
 	}
@@ -50,7 +61,7 @@ func Reg(c *gin.Context) {
 	}
 	result = db.Create(&activateToken)
 	if result.Error != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": result.Error.Error()})
+		c.JSON(http.StatusBadRequest, Controllers.ResponseError{Error: result.Error.Error()})
 		c.Abort()
 		return
 	}
@@ -58,7 +69,7 @@ func Reg(c *gin.Context) {
 	content := `<p>%s，您好</p><br><p>收到此邮件表示您正在注册Rustdesk服务的账号，请点击<a href="%s" target="_blank">此处</a>激活您的账号。如果您没有注册，请忽略此邮件。</p>`
 	publicurl, err := url.Parse(viper.GetString("API.PublicURL"))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, Controllers.ResponseError{Error: err.Error()})
 		c.Abort()
 		return
 	}
@@ -66,7 +77,7 @@ func Reg(c *gin.Context) {
 	mail := Email.NewMailProcessor()
 	err = mail.Send(user.Username, subject, fmt.Sprintf(content, user.Name, publicurl.String()))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, Controllers.ResponseError{Error: err.Error()})
 		c.Abort()
 		return
 	}
