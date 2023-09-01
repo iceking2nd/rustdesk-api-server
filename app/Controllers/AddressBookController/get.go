@@ -24,6 +24,7 @@ import (
 // @Produce json
 // @Success 200 {object} Controllers.Response "Response data is a serialized json string"
 // @Failure default {object} Controllers.ResponseError
+// @Router /ab [get]
 // @Router /ab/get [post]
 func Get(c *gin.Context) {
 	var (
