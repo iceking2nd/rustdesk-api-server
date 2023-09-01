@@ -1,10 +1,44 @@
 {
     "swagger": "2.0",
     "info": {
-        "contact": {}
+        "title": "rustdesk-api-server",
+        "contact": {},
+        "version": "0.0.1"
     },
     "paths": {
         "/ab": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Get all address book and tags data",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Address book and tags"
+                ],
+                "summary": "Get all address book and tags data",
+                "responses": {
+                    "200": {
+                        "description": "Response data is a serialized json string",
+                        "schema": {
+                            "$ref": "#/definitions/Controllers.Response"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/Controllers.ResponseError"
+                        }
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {
