@@ -222,38 +222,7 @@
             }
         },
         "/heartbeat": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Heartbeat with clients",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "System"
-                ],
-                "summary": "Heartbeat with clients",
-                "responses": {
-                    "200": {
-                        "description": "Always return unix timestamp of current time",
-                        "schema": {
-                            "$ref": "#/definitions/SystemController.HeartBeatResponse"
-                        }
-                    }
-                }
-            },
             "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
                 "description": "Heartbeat with clients",
                 "consumes": [
                     "application/json"

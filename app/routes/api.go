@@ -13,15 +13,15 @@ func apiRoutesRegister(route *gin.RouterGroup) {
 	apiRoutes.POST("/reg", UserController.Reg)
 	apiRoutes.GET("/activate/:token", UserController.Activate)
 	apiRoutes.GET("/resend/:username", UserController.Resend)
+	apiRoutes.POST("/heartbeat", SystemController.HeartBeat)
 	apiRoutes.POST("/login", UserController.Login)
 	apiRoutes.POST("/logout", UserController.Logout).Use(Auth.TokenAuth())
 	apiRoutes.POST("/currentUser", UserController.CurrentUser).Use(Auth.TokenAuth())
 	apiRoutes.GET("/audit", SystemController.Audit).Use(Auth.TokenAuth())
 	apiRoutes.POST("/audit", SystemController.Audit).Use(Auth.TokenAuth())
-	apiRoutes.GET("/heartbeat", SystemController.HeartBeat).Use(Auth.TokenAuth())
-	apiRoutes.POST("/heartbeat", SystemController.HeartBeat).Use(Auth.TokenAuth())
 
 	AddressBookRoutes := apiRoutes.Group("/ab").Use(Auth.TokenAuth())
+	AddressBookRoutes.GET("", AddressBookController.Get)
 	AddressBookRoutes.POST("", AddressBookController.Update)
 	AddressBookRoutes.POST("/get", AddressBookController.Get)
 }
