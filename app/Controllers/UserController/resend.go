@@ -16,17 +16,18 @@ import (
 )
 
 // Resend godoc
-// @Summary User activation token resend
-// @Schemes
-// @Description User activation token resend
-// @Tags User
-// @Accept json
-// @Produce json
-// @Param username path string true "Username which you registered"
-// @Success 204
-// @Failure 404 {object} Controllers.ResponseError
-// @Failure 500 {object} Controllers.ResponseError
-// @Router /resend/{username} [get]
+//
+//	@Summary	User activation token resend
+//	@Schemes
+//	@Description	User activation token resend
+//	@Tags			User
+//	@Accept			json
+//	@Produce		json
+//	@Param			username	path	string	true	"Username which you registered"
+//	@Success		204
+//	@Failure		404	{object}	Controllers.ResponseError
+//	@Failure		500	{object}	Controllers.ResponseError
+//	@Router			/resend/{username} [get]
 func Resend(c *gin.Context) {
 	username := c.Param("username")
 	db := Database.GetDB(c)

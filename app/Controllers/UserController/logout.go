@@ -7,6 +7,7 @@ import (
 	"github.com/iceking2nd/rustdesk-api-server/app/Controllers"
 	"github.com/iceking2nd/rustdesk-api-server/app/Middlewares/Database"
 	"github.com/iceking2nd/rustdesk-api-server/app/Models"
+	"github.com/iceking2nd/rustdesk-api-server/global"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"net/http"
@@ -14,18 +15,21 @@ import (
 )
 
 // Logout godoc
-// @Summary User logout
-// @Schemes
-// @Description User logout
-// @Tags User
-// @Accept json
-// @Produce json
-// @Security ApiKeyAuth
-// @Success 200 {object} Controllers.Response
-// @Failure 404 {object} Controllers.ResponseError
-// @Failure 500 {object} Controllers.ResponseError
-// @Router /logout [post]
+//
+//	@Summary	User logout
+//	@Schemes
+//	@Description	User logout
+//	@Tags			User
+//	@Accept			json
+//	@Produce		json
+//	@Security		ApiKeyAuth
+//	@Success		200	{object}	Controllers.Response
+//	@Failure		404	{object}	Controllers.ResponseError
+//	@Failure		500	{object}	Controllers.ResponseError
+//	@Router			/logout [post]
 func Logout(c *gin.Context) {
+	log := global.Log.WithField("functions", "app.Controllers.UserController.Logout")
+	log.WithField("request", c.Request).Debugln("Logout request")
 	db := Database.GetDB(c).Session(&gorm.Session{FullSaveAssociations: true})
 	var token Models.Token
 	err := db.Preload(clause.Associations).Where(&Models.Token{AccessToken: strings.Split(c.Request.Header.Get("Authorization"), " ")[1]}).First(&token).Error

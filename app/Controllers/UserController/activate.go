@@ -10,16 +10,17 @@ import (
 )
 
 // Activate godoc
-// @Summary User account activation
-// @Schemes
-// @Description User account activation
-// @Tags User
-// @Accept json
-// @Produce json
-// @Param token path string true "Activation token user received by email"
-// @Success 204
-// @Failure 500 {object} Controllers.ResponseError
-// @Router /activate/{token} [get]
+//
+//	@Summary	User account activation
+//	@Schemes
+//	@Description	User account activation
+//	@Tags			User
+//	@Accept			json
+//	@Produce		json
+//	@Param			token	path	string	true	"Activation token user received by email"
+//	@Success		204
+//	@Failure		500	{object}	Controllers.ResponseError
+//	@Router			/activate/{token} [get]
 func Activate(c *gin.Context) {
 	token := c.Param("token")
 	db := Database.GetDB(c)

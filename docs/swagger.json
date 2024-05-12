@@ -68,8 +68,8 @@
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "No Content"
+                    "200": {
+                        "description": "OK"
                     },
                     "default": {
                         "description": "",
@@ -493,16 +493,39 @@
         "UserController.LoginRequest": {
             "type": "object",
             "properties": {
+                "autoLogin": {
+                    "type": "boolean"
+                },
+                "deviceInfo": {
+                    "$ref": "#/definitions/UserController.LoginRequestDeviceInfo"
+                },
                 "id": {
                     "type": "string"
                 },
                 "password": {
                     "type": "string"
                 },
+                "type": {
+                    "type": "string"
+                },
                 "username": {
                     "type": "string"
                 },
                 "uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "UserController.LoginRequestDeviceInfo": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "os": {
+                    "type": "string"
+                },
+                "type": {
                     "type": "string"
                 }
             }

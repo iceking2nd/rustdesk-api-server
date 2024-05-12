@@ -3,6 +3,7 @@ package SystemController
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/iceking2nd/rustdesk-api-server/app/Controllers"
+	"github.com/iceking2nd/rustdesk-api-server/global"
 	"net/http"
 	"time"
 )
@@ -19,15 +20,18 @@ type HeartBeatResponse struct {
 }
 
 // HeartBeat godoc
-// @Summary Heartbeat with clients
-// @Schemes
-// @Description Heartbeat with clients
-// @Tags System
-// @Accept json
-// @Produce json
-// @Success 200 {object} HeartBeatResponse "Always return unix timestamp of current time"
-// @Router /heartbeat [post]
+//
+//	@Summary	Heartbeat with clients
+//	@Schemes
+//	@Description	Heartbeat with clients
+//	@Tags			System
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	HeartBeatResponse	"Always return unix timestamp of current time"
+//	@Router			/heartbeat [post]
 func HeartBeat(c *gin.Context) {
+	log := global.Log.WithField("functions", "app.Controllers.SystemController.HeartBeat")
+	log.WithField("request", c.Request).Traceln("received request")
 	var data HeartBeatRequest
 	err := c.ShouldBindJSON(&data)
 	if err != nil {

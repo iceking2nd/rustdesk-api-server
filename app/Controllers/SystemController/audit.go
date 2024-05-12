@@ -14,17 +14,18 @@ import (
 )
 
 // Audit godoc
-// @Summary Audit logs
-// @Schemes
-// @Description I don't know how to use it, and the request was not caught.
-// @Tags System
-// @Security ApiKeyAuth
-// @Accept json
-// @Produce json
-// @Success 200 {object} Controllers.Response "Always return "正常""
-// @Failure default {object} Controllers.ResponseError
-// @Router /audit [get]
-// @Router /audit [post]
+//
+//	@Summary	Audit logs
+//	@Schemes
+//	@Description	I don't know how to use it, and the request was not caught.
+//	@Tags			System
+//	@Security		ApiKeyAuth
+//	@Accept			json
+//	@Produce		json
+//	@Success		200		{object}	Controllers.Response	"Always return "正常""
+//	@Failure		default	{object}	Controllers.ResponseError
+//	@Router			/audit [get]
+//	@Router			/audit [post]
 func Audit(c *gin.Context) {
 	rt := strings.Split(c.Request.Header.Get("Authorization"), " ")[1]
 	db := Database.GetDB(c)

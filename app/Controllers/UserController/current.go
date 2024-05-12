@@ -7,6 +7,7 @@ import (
 	"github.com/iceking2nd/rustdesk-api-server/app/Controllers"
 	"github.com/iceking2nd/rustdesk-api-server/app/Middlewares/Database"
 	"github.com/iceking2nd/rustdesk-api-server/app/Models"
+	"github.com/iceking2nd/rustdesk-api-server/global"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"net/http"
@@ -18,24 +19,27 @@ type CurrentUserResponse struct {
 }
 
 // CurrentUser godoc
-// @Summary CurrentUser Info
-// @Schemes
-// @Description Get current login user info
-// @Tags User
-// @Security ApiKeyAuth
-// @Accept json
-// @Produce json
-// @Success 200 {object} CurrentUserResponse
-// @Failure 404 {object} Controllers.ResponseError
-// @Failure 500 {object} Controllers.ResponseError
-// @Router /currentUser [post]
+//
+//	@Summary	CurrentUser Info
+//	@Schemes
+//	@Description	Get current login user info
+//	@Tags			User
+//	@Security		ApiKeyAuth
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	CurrentUserResponse
+//	@Failure		404	{object}	Controllers.ResponseError
+//	@Failure		500	{object}	Controllers.ResponseError
+//	@Router			/currentUser [post]
 func CurrentUser(c *gin.Context) {
+	log := global.Log.WithField("functions", "app.Controllers.UserController.CurrentUser")
+	log.WithField("request", c.Request).Debugln("refreshCurrentUser request")
 	rt := strings.Split(c.Request.Header.Get("Authorization"), " ")[1]
 	db := Database.GetDB(c)
 	var token Models.Token
 	err := db.Preload(clause.Associations).Where(&Models.Token{AccessToken: rt}).First(&token).Error
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-		c.JSON(http.StatusNotFound, Controllers.ResponseError{Error: "Token已失效，请重新登录"})
+		c.JSON(http.StatusUnauthorized, Controllers.ResponseError{Error: "Invalid token"})
 		return
 	} else if err != nil {
 		c.JSON(http.StatusInternalServerError, Controllers.ResponseError{Error: fmt.Sprintf("查询Token数据时出现错误：%s", err.Error())})

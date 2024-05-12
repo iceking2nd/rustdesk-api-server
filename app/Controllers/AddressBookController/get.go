@@ -7,6 +7,7 @@ import (
 	"github.com/iceking2nd/rustdesk-api-server/app/Controllers"
 	"github.com/iceking2nd/rustdesk-api-server/app/Middlewares/Database"
 	"github.com/iceking2nd/rustdesk-api-server/app/Models"
+	"github.com/iceking2nd/rustdesk-api-server/global"
 	"github.com/tidwall/sjson"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -15,18 +16,21 @@ import (
 )
 
 // Get address book and tags godoc
-// @Summary Get all address book and tags data
-// @Schemes
-// @Description Get all address book and tags data
-// @Tags Address book and tags
-// @Security ApiKeyAuth
-// @Accept json
-// @Produce json
-// @Success 200 {object} Controllers.Response "Response data is a serialized json string"
-// @Failure default {object} Controllers.ResponseError
-// @Router /ab [get]
-// @Router /ab/get [post]
+//
+//	@Summary	Get all address book and tags data
+//	@Schemes
+//	@Description	Get all address book and tags data
+//	@Tags			Address book and tags
+//	@Security		ApiKeyAuth
+//	@Accept			json
+//	@Produce		json
+//	@Success		200		{object}	Controllers.Response	"Response data is a serialized json string"
+//	@Failure		default	{object}	Controllers.ResponseError
+//	@Router			/ab [get]
+//	@Router			/ab/get [post]
 func Get(c *gin.Context) {
+	log := global.Log.WithField("functions", "app.Controllers.AddressBookController.Get")
+	log.WithField("request", c.Request).Debugln("received request")
 	var (
 		token Models.Token
 		user  Models.User

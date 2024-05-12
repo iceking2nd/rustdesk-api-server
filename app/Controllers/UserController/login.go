@@ -7,6 +7,7 @@ import (
 	"github.com/iceking2nd/rustdesk-api-server/app/Controllers"
 	"github.com/iceking2nd/rustdesk-api-server/app/Middlewares/Database"
 	"github.com/iceking2nd/rustdesk-api-server/app/Models"
+	"github.com/iceking2nd/rustdesk-api-server/global"
 	"github.com/iceking2nd/rustdesk-api-server/utils/Hash"
 	"gorm.io/gorm"
 	"net/http"
@@ -14,10 +15,19 @@ import (
 )
 
 type LoginRequest struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-	ClientID string `json:"id"`
-	UUID     string `json:"uuid"`
+	Username   string                 `json:"username"`
+	Password   string                 `json:"password"`
+	ClientID   string                 `json:"id"`
+	UUID       string                 `json:"uuid"`
+	AutoLogin  bool                   `json:"autoLogin"`
+	Type       string                 `json:"type"`
+	DeviceInfo LoginRequestDeviceInfo `json:"deviceInfo"`
+}
+
+type LoginRequestDeviceInfo struct {
+	OS   string `json:"os"`
+	Type string `json:"type"`
+	Name string `json:"name"`
 }
 
 type LoginResponse struct {
@@ -29,18 +39,20 @@ type LoginResponse struct {
 }
 
 // Login godoc
-// @Summary User login
-// @Schemes
-// @Description User login
-// @Tags User
-// @Accept json
-// @Produce json
-// @Param LoginRequest body LoginRequest true "Login data"
-// @Success 200 {object} LoginResponse
-// @Failure 403 {object} Controllers.ResponseError
-// @Failure 500 {object} Controllers.ResponseError
-// @Router /login [post]
+//
+//	@Summary	User login
+//	@Schemes
+//	@Description	User login
+//	@Tags			User
+//	@Accept			json
+//	@Produce		json
+//	@Param			LoginRequest	body		LoginRequest	true	"Login data"
+//	@Success		200				{object}	LoginResponse
+//	@Failure		403				{object}	Controllers.ResponseError
+//	@Failure		500				{object}	Controllers.ResponseError
+//	@Router			/login [post]
 func Login(c *gin.Context) {
+	log := global.Log.WithField("functions", "app.Controllers.UserController.Login")
 	db := Database.GetDB(c)
 	var data LoginRequest
 	err := c.BindJSON(&data)
@@ -48,6 +60,7 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, Controllers.ResponseError{Error: fmt.Sprintf("接收登录数据时出现错误：%s", err.Error())})
 		return
 	}
+	log.WithField("data", data).Debugln("Login Request Data")
 	hashedPassword, err := Hash.StringToSHA512(data.Password)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, Controllers.ResponseError{Error: fmt.Sprintf("处理密码时出现错误：%s", err.Error())})

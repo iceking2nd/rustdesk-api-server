@@ -5,14 +5,20 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"github.com/iceking2nd/rustdesk-api-server/app/Controllers"
 	"github.com/iceking2nd/rustdesk-api-server/app/Middlewares/Database"
 	"github.com/iceking2nd/rustdesk-api-server/app/routes"
 	"github.com/iceking2nd/rustdesk-api-server/docs"
+	"github.com/iceking2nd/rustdesk-api-server/global"
+	"github.com/sirupsen/logrus"
+	"io"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
+	"runtime"
 	"syscall"
 	"time"
 
@@ -22,9 +28,13 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	ginglog "github.com/szuecs/gin-glog"
+	"github.com/toorop/gin-logrus"
 )
 
-var cfgFile string
+var (
+	cfgFile string
+	logFile string
+)
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -56,23 +66,19 @@ var rootCmd = &cobra.Command{
 			ReadTimeout:  120 * time.Second,
 			WriteTimeout: 120 * time.Second,
 		}
-		/*
-			apiEngine.NoRoute(func(context *gin.Context) {
-				context.Writer.WriteHeader(200)
-				index, _ := frontend.RootFS.ReadFile("dist/index.html")
-				_, _ = context.Writer.Write(index)
-				context.Writer.Header().Add("Accept", "text/html")
-			})
-		*/
+		apiEngine.NoRoute(func(c *gin.Context) {
+			global.Log.WithField("request", c.Request).Debugln("received 404 requests")
+			c.JSON(http.StatusNotFound, Controllers.ResponseError{Error: "server_not_support"})
+			return
+		})
 		root := apiEngine.Group("/")
 		root.Use(ginglog.Logger(3 * time.Second))
 		root.Use(Database.SetContext())
-		root.Use(gin.Recovery())
+		root.Use(ginlogrus.Logger(global.Log), gin.Recovery())
 		routes.SetupRouter(root)
-
 		go func() {
 			var err error
-			if err = apiServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			if err = apiServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 				log.Fatalf("HTTP server listen: %s\n", err.Error())
 			}
 		}()
@@ -117,6 +123,16 @@ func init() {
 	// will be global for your application.
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.config/rustdesk-api-server.yaml)")
+	rootCmd.PersistentFlags().StringVar(&logFile, "log-file", "", "logging file")
+	rootCmd.PersistentFlags().Uint32Var(&global.LogLevel, "log-level", 3, "log level (0 - 6, 3 = warn , 5 = debug)")
+
+	rootCmd.SetVersionTemplate(fmt.Sprintf(`{{with .Name}}{{printf "%%s version information: " .}}{{end}}
+   {{printf "Version:    %%s" .Version}}
+   Build Time:		%s
+   Git Revision:	%s
+   Go version:		%s
+   OS/Arch:			%s/%s
+`, global.BuildTime, global.GitCommit, runtime.Version(), runtime.GOOS, runtime.GOARCH))
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
@@ -173,4 +189,17 @@ func initConfig() {
 		os.Exit(0)
 	}
 
+	global.Log = logrus.New()
+	var logWriter io.Writer
+	if logFile == "" {
+		logWriter = os.Stdout
+	} else {
+		logFileHandle, err := os.OpenFile(logFile, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0644)
+		if err != nil {
+			panic(err.Error())
+		}
+		logWriter = io.MultiWriter(os.Stdout, logFileHandle)
+	}
+	global.Log.SetOutput(logWriter)
+	global.Log.SetLevel(logrus.Level(global.LogLevel))
 }

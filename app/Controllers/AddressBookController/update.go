@@ -19,17 +19,18 @@ type AddressBookUpdateRequest struct {
 }
 
 // Update address book and tags godoc
-// @Summary Update all address book and tags data
-// @Schemes
-// @Description Update all address book and tags data
-// @Tags Address book and tags
-// @Security ApiKeyAuth
-// @Accept json
-// @Produce json
-// @Param AddressBookUpdateRequest body AddressBookUpdateRequest true "Update data is a serialized json string"
-// @Success 204
-// @Failure default {object} Controllers.ResponseError
-// @Router /ab [post]
+//
+//	@Summary	Update all address book and tags data
+//	@Schemes
+//	@Description	Update all address book and tags data
+//	@Tags			Address book and tags
+//	@Security		ApiKeyAuth
+//	@Accept			json
+//	@Produce		json
+//	@Param			AddressBookUpdateRequest	body	AddressBookUpdateRequest	true	"Update data is a serialized json string"
+//	@Success		200
+//	@Failure		default	{object}	Controllers.ResponseError
+//	@Router			/ab [post]
 func Update(c *gin.Context) {
 	var (
 		reqdata AddressBookUpdateRequest
@@ -111,5 +112,5 @@ func Update(c *gin.Context) {
 		}
 		return true
 	})
-	c.JSON(http.StatusNoContent, nil)
+	c.JSON(http.StatusOK, nil)
 }

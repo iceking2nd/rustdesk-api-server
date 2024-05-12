@@ -21,17 +21,18 @@ type RegRequest struct {
 }
 
 // Reg Register godoc
-// @Summary User registration
-// @Schemes
-// @Description Register a new user
-// @Tags User
-// @Accept json
-// @Produce json
-// @Param RegRequest body RegRequest true "Username must be email, password min length is 8, name is required"
-// @Success 204
-// @Failure 400 {object} Controllers.ResponseError
-// @Failure 500 {object} Controllers.ResponseError
-// @Router /reg [post]
+//
+//	@Summary	User registration
+//	@Schemes
+//	@Description	Register a new user
+//	@Tags			User
+//	@Accept			json
+//	@Produce		json
+//	@Param			RegRequest	body	RegRequest	true	"Username must be email, password min length is 8, name is required"
+//	@Success		204
+//	@Failure		400	{object}	Controllers.ResponseError
+//	@Failure		500	{object}	Controllers.ResponseError
+//	@Router			/reg [post]
 func Reg(c *gin.Context) {
 	var data RegRequest
 	if err := c.ShouldBindJSON(&data); err != nil {
