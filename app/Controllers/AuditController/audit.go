@@ -1,4 +1,4 @@
-package SystemController
+package AuditController
 
 import (
 	"errors"
@@ -40,3 +40,5 @@ func Audit(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, Controllers.Response{Data: "正常"})
 }
+
+func AuditPut(c *gin.Context) {}

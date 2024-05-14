@@ -7,10 +7,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/iceking2nd/rustdesk-api-server/app/Controllers"
 	"github.com/iceking2nd/rustdesk-api-server/app/Middlewares/Database"
 	"github.com/iceking2nd/rustdesk-api-server/app/routes"
 	"github.com/iceking2nd/rustdesk-api-server/docs"
+	"github.com/iceking2nd/rustdesk-api-server/frontend"
 	"github.com/iceking2nd/rustdesk-api-server/global"
 	"github.com/sirupsen/logrus"
 	"io"
@@ -49,7 +49,9 @@ var rootCmd = &cobra.Command{
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
-		//gin.SetMode(gin.ReleaseMode)
+		if global.LogLevel < 5 {
+			gin.SetMode(gin.ReleaseMode)
+		}
 		apiEngine := gin.New()
 		docs.SwaggerInfo.BasePath = "/api"
 		corsConfig := cors.Config{
@@ -66,11 +68,25 @@ var rootCmd = &cobra.Command{
 			ReadTimeout:  120 * time.Second,
 			WriteTimeout: 120 * time.Second,
 		}
-		apiEngine.NoRoute(func(c *gin.Context) {
+		/*apiEngine.NoRoute(func(c *gin.Context) {
 			global.Log.WithField("request", c.Request).Debugln("received 404 requests")
 			c.JSON(http.StatusNotFound, Controllers.ResponseError{Error: "server_not_support"})
 			return
+		})*/
+		apiEngine.NoRoute(func(context *gin.Context) {
+			index, err := frontend.StaticFS.ReadFile("static/index.html")
+			if err != nil {
+				global.Log.WithField("error", err.Error()).Debugln("reading file from static fs error")
+				context.Writer.WriteHeader(http.StatusNotFound)
+				_, _ = context.Writer.Write([]byte(err.Error()))
+				context.Writer.Header().Add("Accept", "text/html")
+				return
+			}
+			context.Writer.WriteHeader(http.StatusOK)
+			_, _ = context.Writer.Write(index)
+			context.Writer.Header().Add("Accept", "text/html")
 		})
+
 		root := apiEngine.Group("/")
 		root.Use(ginglog.Logger(3 * time.Second))
 		root.Use(Database.SetContext())
