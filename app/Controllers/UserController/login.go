@@ -31,11 +31,22 @@ type LoginRequestDeviceInfo struct {
 }
 
 type LoginResponse struct {
-	Type        string `json:"type"`
-	AccessToken string `json:"access_token"`
-	User        struct {
-		Name string `json:"name"`
-	} `json:"user"`
+	Type        string            `json:"type"`
+	AccessToken string            `json:"access_token"`
+	TFAType     string            `json:"tfa_type"`
+	Secret      string            `json:"secret"`
+	User        LoginResponseUser `json:"user"`
+}
+
+type LoginResponseUser struct {
+	Name    string                `json:"name"`
+	Note    string                `json:"note"`
+	Info    LoginResponseUserInfo `json:"info"`
+	IsAdmin bool                  `json:"is_admin"`
+}
+
+type LoginResponseUserInfo struct {
+	EmailAlarmNotification bool `json:"email_alarm_notification"`
 }
 
 // Login godoc
@@ -96,8 +107,15 @@ func Login(c *gin.Context) {
 	c.JSON(http.StatusOK, LoginResponse{
 		Type:        "access_token",
 		AccessToken: token,
-		User: struct {
-			Name string `json:"name"`
-		}{Name: u.Username},
+		TFAType:     "",
+		Secret:      "",
+		User: LoginResponseUser{
+			Name: u.Username,
+			Note: "",
+			Info: LoginResponseUserInfo{
+				EmailAlarmNotification: true,
+			},
+			IsAdmin: true,
+		},
 	})
 }

@@ -8,11 +8,13 @@ import (
 	"errors"
 	"fmt"
 	"github.com/iceking2nd/rustdesk-api-server/app/Middlewares/Database"
+	"github.com/iceking2nd/rustdesk-api-server/app/Middlewares/Debugger"
 	"github.com/iceking2nd/rustdesk-api-server/app/routes"
 	"github.com/iceking2nd/rustdesk-api-server/docs"
 	"github.com/iceking2nd/rustdesk-api-server/frontend"
 	"github.com/iceking2nd/rustdesk-api-server/global"
 	"github.com/sirupsen/logrus"
+	ginlogrus "github.com/toorop/gin-logrus"
 	"io"
 	"log"
 	"net/http"
@@ -28,7 +30,6 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	ginglog "github.com/szuecs/gin-glog"
-	"github.com/toorop/gin-logrus"
 )
 
 var (
@@ -88,9 +89,15 @@ var rootCmd = &cobra.Command{
 		})
 
 		root := apiEngine.Group("/")
-		root.Use(ginglog.Logger(3 * time.Second))
-		root.Use(Database.SetContext())
-		root.Use(ginlogrus.Logger(global.Log), gin.Recovery())
+		if global.LogLevel >= 5 {
+			root.Use(Debugger.RequestLogger())
+		}
+		root.Use(
+			ginglog.Logger(3*time.Second),
+			ginlogrus.Logger(global.Log),
+			gin.Recovery(),
+			Database.SetContext(),
+		)
 		routes.SetupRouter(root)
 		go func() {
 			var err error

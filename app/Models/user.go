@@ -13,6 +13,7 @@ type User struct {
 	Username    string         `json:"username" gorm:"uniqueIndex;type:varchar(64)"`
 	Password    string
 	Name        string `json:"name" gorm:"type:varchar(64)"`
+	IsAdmin     bool   `json:"is_admin"`
 	IsValidated bool   `json:"is-validated"`
 	Tokens      []Token
 }

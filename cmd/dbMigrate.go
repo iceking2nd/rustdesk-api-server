@@ -30,6 +30,7 @@ var dbMigrateCmd = &cobra.Command{
 			&Models.Tag{},
 			&Models.Address{},
 			&Models.ActivateToken{},
+			&Models.Settings{},
 		); err != nil {
 			log.Fatalln(err.Error())
 		} else {
