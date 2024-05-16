@@ -10,6 +10,7 @@ type User struct {
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 	DeletedAt   gorm.DeletedAt `gorm:"index"`
+	GUID        string         `json:"guid" gorm:"uniqueIndex;type:varchar(64)"`
 	Username    string         `json:"username" gorm:"uniqueIndex;type:varchar(64)"`
 	Password    string
 	Name        string `json:"name" gorm:"type:varchar(64)"`

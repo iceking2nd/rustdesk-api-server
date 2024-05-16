@@ -33,6 +33,9 @@ func apiRoutesRegister(route *gin.RouterGroup) {
 	apiRoutes := route.Group("/api")
 	apiRoutes.POST("/login", UserController.Login)
 	apiRoutes.GET("/login-options", UserController.LoginOptions)
+	apiRoutes.POST("/logout", Auth.TokenAuth(), UserController.Logout)
+	apiRoutes.POST("/currentUser", Auth.TokenAuth(), UserController.CurrentUser)
+	apiRoutes.POST("/initialState", Auth.TokenAuth(), SystemController.InitialState)
 	apiRoutes.GET("/activate/:token", UserController.Activate)
 	apiRoutes.GET("/cfg", SystemController.Cfg)
 	apiRoutes.GET("/check/read", SystemController.CheckRead)
@@ -49,12 +52,7 @@ func apiRoutesRegister(route *gin.RouterGroup) {
 	apiRoutes.POST("/reg", UserController.Reg)
 	apiRoutes.POST("/reinvite", UserController.ReInvite)
 	apiRoutes.GET("/resend/:username", UserController.Resend)
-	apiRoutes.GET("/user-list", UserController.UserList)
-
-	apiRoutesWithAuth := route.Group("/api").Use(Auth.TokenAuth())
-	apiRoutesWithAuth.POST("/logout", UserController.Logout)
-	apiRoutesWithAuth.POST("/currentUser", UserController.CurrentUser)
-	apiRoutesWithAuth.POST("/initialState", SystemController.InitialState)
+	apiRoutes.GET("/user-list", Auth.TokenAuth(), UserController.UserList)
 
 	AddressBookRoutes := apiRoutes.Group("/ab").Use(Auth.TokenAuth())
 	AddressBookRoutes.GET("", AddressBookController.Get)

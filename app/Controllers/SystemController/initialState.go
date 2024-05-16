@@ -1,10 +1,13 @@
 package SystemController
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
+	"github.com/iceking2nd/rustdesk-api-server/app/Controllers"
 	"github.com/iceking2nd/rustdesk-api-server/app/Middlewares/Database"
 	"github.com/iceking2nd/rustdesk-api-server/app/Models"
 	"github.com/iceking2nd/rustdesk-api-server/global"
+	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"net/http"
 	"strings"
@@ -55,7 +58,11 @@ func InitialState(c *gin.Context) {
 	r.User.IsAdmin = token.User.IsAdmin
 
 	var settings []Models.Settings
-	db.Find(&settings)
+	err := db.Find(&settings).Error
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		c.JSON(http.StatusInternalServerError, Controllers.ResponseError{Error: err.Error()})
+		return
+	}
 	for _, setting := range settings {
 		r.Settings = append(r.Settings, struct {
 			Key   string `json:"key"`

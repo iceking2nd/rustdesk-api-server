@@ -41,17 +41,19 @@ func Logout(c *gin.Context) {
 		return
 	}
 
-	var addr Models.Address
+	if token.LoginTokenType != "browser" {
+		var addr Models.Address
 
-	err = db.Where("client_id = ? AND user_id = ?", token.ClientID, token.UserID).First(&addr).Error
-	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-		c.JSON(http.StatusInternalServerError, Controllers.ResponseError{Error: fmt.Sprintf("获取终端对应地址簿条目时出现错误：%s", err.Error())})
-		return
-	}
-	err = db.Select(clause.Associations).Delete(&addr).Error
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, Controllers.ResponseError{Error: fmt.Sprintf("清理终端对应地址簿条目时出现错误：%s", err.Error())})
-		return
+		err = db.Where("client_id = ? AND user_id = ?", token.ClientID, token.UserID).First(&addr).Error
+		if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusInternalServerError, Controllers.ResponseError{Error: fmt.Sprintf("获取终端对应地址簿条目时出现错误：%s", err.Error())})
+			return
+		}
+		err = db.Select(clause.Associations).Delete(&addr).Error
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, Controllers.ResponseError{Error: fmt.Sprintf("清理终端对应地址簿条目时出现错误：%s", err.Error())})
+			return
+		}
 	}
 	err = db.Delete(&token).Error
 	if err != nil {

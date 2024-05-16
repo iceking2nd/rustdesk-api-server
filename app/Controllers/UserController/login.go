@@ -91,18 +91,20 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, Controllers.ResponseError{Error: fmt.Sprintf("生成Token时出现错误：%s", err.Error())})
 		return
 	}
-	t := Models.Token{AccessToken: token, UserID: u.ID, ClientID: data.ClientID}
+	t := Models.Token{AccessToken: token, UserID: u.ID, ClientID: data.ClientID, LoginTokenType: data.DeviceInfo.Type}
 	result := db.Create(&t)
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, Controllers.ResponseError{Error: fmt.Sprintf("保存Token时出现错误：%s", result.Error.Error())})
 		return
 	}
 
-	var addr Models.Address
-	err = db.Where(&Models.Address{UserID: u.ID, ClientID: data.ClientID}).FirstOrCreate(&addr).Error
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, Controllers.ResponseError{Error: fmt.Sprintf("向地址簿保存本机信息时出现错误：%s", err.Error())})
-		return
+	if data.DeviceInfo.Type != "browser" {
+		var addr Models.Address
+		err = db.Where(&Models.Address{UserID: u.ID, ClientID: data.ClientID}).FirstOrCreate(&addr).Error
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, Controllers.ResponseError{Error: fmt.Sprintf("向地址簿保存本机信息时出现错误：%s", err.Error())})
+			return
+		}
 	}
 	c.JSON(http.StatusOK, LoginResponse{
 		Type:        "access_token",
@@ -115,7 +117,7 @@ func Login(c *gin.Context) {
 			Info: LoginResponseUserInfo{
 				EmailAlarmNotification: true,
 			},
-			IsAdmin: true,
+			IsAdmin: u.IsAdmin,
 		},
 	})
 }
