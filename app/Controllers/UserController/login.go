@@ -78,7 +78,7 @@ func Login(c *gin.Context) {
 		return
 	}
 	var u Models.User
-	err = db.Where(&Models.User{Username: data.Username, Password: hashedPassword, IsValidated: true}).First(&u).Error
+	err = db.Where(&Models.User{Username: data.Username, Password: hashedPassword, Status: 1}).First(&u).Error
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
 		c.JSON(http.StatusForbidden, Controllers.ResponseError{Error: "您的帐号、密码不正确或帐号未经过验证。"})
 		return

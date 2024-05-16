@@ -48,7 +48,7 @@ func Reg(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	user := Models.User{Username: data.Username, Password: password, Name: data.Name, IsValidated: false}
+	user := Models.User{Username: data.Username, Password: password, Name: data.Name, Status: 0}
 	result := db.Create(&user)
 	if result.Error != nil {
 		c.JSON(http.StatusBadRequest, Controllers.ResponseError{Error: result.Error.Error()})

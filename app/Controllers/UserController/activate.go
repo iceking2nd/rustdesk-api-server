@@ -32,7 +32,7 @@ func Activate(c *gin.Context) {
 		return
 	}
 	user := activateToken.User
-	user.IsValidated = true
+	user.Status = 1
 	result = db.Updates(&user)
 	if result.Error != nil {
 		c.JSON(http.StatusInternalServerError, Controllers.ResponseError{Error: result.Error.Error()})
