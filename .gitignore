@@ -205,6 +205,5 @@ Temporary Items
 .apdisk
 
 binaries
-frontend
 *.yaml
 *.log

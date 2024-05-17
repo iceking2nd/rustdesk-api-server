@@ -41,7 +41,7 @@ func apiRoutesRegister(route *gin.RouterGroup) {
 	apiRoutes.GET("/check/read", SystemController.CheckRead)
 	apiRoutes.PUT("/delete-groups", GroupsController.Delete)
 	apiRoutes.PUT("/enable-peers", PeersController.Enable)
-	apiRoutes.PUT("/enable-users", UserController.Enable)
+	apiRoutes.PUT("/enable-users", Auth.TokenAuth(), UserController.Enable)
 	apiRoutes.POST("/execute", SystemController.Execute)
 	apiRoutes.GET("/geofile", GeoController.GeoFile)
 	apiRoutes.POST("/heartbeat", SystemController.HeartBeat)
@@ -142,7 +142,7 @@ func apiRoutesRegister(route *gin.RouterGroup) {
 	SettingsRoutes := apiRoutes.Group("/settings")
 	SettingsRoutes.PUT("", SettingsController.Put)
 
-	SMTPRoutes := apiRoutes.Group("/smtp")
+	SMTPRoutes := apiRoutes.Group("/smtp").Use(Auth.TokenAuth())
 	SMTPRoutes.POST("/validate", SMTPController.Validate)
 
 	StrategiesRoutes := apiRoutes.Group("/strategies")
@@ -156,7 +156,7 @@ func apiRoutesRegister(route *gin.RouterGroup) {
 	StrategyRoutes.GET("/options", StrategyController.Options)
 	StrategyRoutes.PUT("/status", StrategyController.Status)
 
-	TeamRoutes := apiRoutes.Group("/team")
+	TeamRoutes := apiRoutes.Group("/team").Use(Auth.TokenAuth())
 	TeamRoutes.GET("/info", TeamController.InfoGet)
 	TeamRoutes.PUT("/info", TeamController.InfoPut)
 

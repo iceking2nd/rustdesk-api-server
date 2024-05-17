@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/iceking2nd/rustdesk-api-server/app/Middlewares/Database"
 	"github.com/iceking2nd/rustdesk-api-server/app/Models"
+	"github.com/iceking2nd/rustdesk-api-server/global"
 	"github.com/iceking2nd/rustdesk-api-server/utils/Paginate"
 	"net/http"
 	"strconv"
@@ -26,7 +27,12 @@ func UserList(c *gin.Context) {
 		Page:    page,
 		Limit:   limit,
 		OrderBy: []string{fmt.Sprintf("%s %s", orderby, sort)},
-		ShowSQL: true,
+		ShowSQL: func() bool {
+			if global.LogLevel >= 5 {
+				return true
+			}
+			return false
+		}(),
 	}, &[]Models.User{})
 	c.JSON(http.StatusOK, userListPageinateWrapper(pg, c))
 }
