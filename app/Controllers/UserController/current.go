@@ -7,7 +7,7 @@ import (
 	"github.com/iceking2nd/rustdesk-api-server/app/Controllers"
 	"github.com/iceking2nd/rustdesk-api-server/app/Middlewares/Database"
 	"github.com/iceking2nd/rustdesk-api-server/app/Models"
-	"github.com/iceking2nd/rustdesk-api-server/global"
+	"github.com/tidwall/gjson"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"net/http"
@@ -15,7 +15,11 @@ import (
 )
 
 type CurrentUserResponse struct {
-	Name string `json:"name"`
+	Name    string      `json:"name"`
+	IsAdmin bool        `json:"is_admin"`
+	Note    string      `json:"note"`
+	Info    interface{} `json:"info"`
+	EMail   string      `json:"email"`
 }
 
 // CurrentUser godoc
@@ -32,8 +36,6 @@ type CurrentUserResponse struct {
 //	@Failure		500	{object}	Controllers.ResponseError
 //	@Router			/currentUser [post]
 func CurrentUser(c *gin.Context) {
-	log := global.Log.WithField("functions", "app.Controllers.UserController.CurrentUser")
-	log.WithField("request", c.Request).Debugln("refreshCurrentUser request")
 	rt := strings.Split(c.Request.Header.Get("Authorization"), " ")[1]
 	db := Database.GetDB(c)
 	var token Models.Token
@@ -45,5 +47,18 @@ func CurrentUser(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, Controllers.ResponseError{Error: fmt.Sprintf("查询Token数据时出现错误：%s", err.Error())})
 		return
 	}
-	c.JSON(http.StatusOK, CurrentUserResponse{Name: token.User.Username})
+	c.JSON(http.StatusOK, CurrentUserResponse{
+		Name:    token.User.Name,
+		IsAdmin: token.User.IsAdmin,
+		Note:    token.User.Note,
+		Info: func(info string) map[string]interface{} {
+			i := make(map[string]interface{})
+			gjson.Parse(info).ForEach(func(key, value gjson.Result) bool {
+				i[key.String()] = value.Value()
+				return true
+			})
+			return i
+		}(token.User.Info),
+		EMail: token.User.Username,
+	})
 }

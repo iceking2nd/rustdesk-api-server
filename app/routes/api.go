@@ -49,7 +49,6 @@ func apiRoutesRegister(route *gin.RouterGroup) {
 	apiRoutes.PUT("/id-change-support", SystemController.IDChangeSupportPut)
 	apiRoutes.POST("/invite", UserController.Invite)
 	apiRoutes.GET("/notices", SystemController.Notices)
-	apiRoutes.POST("/reg", UserController.Reg)
 	apiRoutes.POST("/reinvite", UserController.ReInvite)
 	apiRoutes.GET("/resend/:username", UserController.Resend)
 	apiRoutes.GET("/user-list", Auth.TokenAuth(), UserController.UserList)
@@ -114,19 +113,19 @@ func apiRoutesRegister(route *gin.RouterGroup) {
 	GeoRoutes.PUT("", GeoController.Update)
 	GeoRoutes.DELETE("", GeoController.Delete)
 
-	GroupRoutes := apiRoutes.Group("/group")
-	GroupRoutes.POST("", GroupController.GroupPost)
+	GroupRoutes := apiRoutes.Group("/group").Use(Auth.TokenAuth())
+	GroupRoutes.POST("", GroupController.Create)
 	GroupRoutes.PUT("", GroupController.GroupPut)
 
-	GroupsRoutes := apiRoutes.Group("/groups")
-	GroupsRoutes.GET("", GroupsController.Get)
+	GroupsRoutes := apiRoutes.Group("/groups").Use(Auth.TokenAuth())
+	GroupsRoutes.GET("", GroupsController.List)
 
 	KeypairRoutes := apiRoutes.Group("/keypair")
 	KeypairRoutes.GET("", KeypairController.KeypairGet)
 	KeypairRoutes.POST("", KeypairController.KeypairPost)
 	KeypairRoutes.PUT("", KeypairController.KeypairPut)
 
-	NamesRoutes := apiRoutes.Group("/names")
+	NamesRoutes := apiRoutes.Group("/names").Use(Auth.TokenAuth())
 	NamesRoutes.GET("", NamesController.Get)
 
 	PeerRoutes := apiRoutes.Group("/peer")
@@ -139,7 +138,7 @@ func apiRoutesRegister(route *gin.RouterGroup) {
 	SessionRoutes.GET("/exp_time", SessionController.ExpTimeGet)
 	SessionRoutes.PUT("/exp_time", SessionController.ExpTimePut)
 
-	SettingsRoutes := apiRoutes.Group("/settings")
+	SettingsRoutes := apiRoutes.Group("/settings").Use(Auth.TokenAuth())
 	SettingsRoutes.PUT("", SettingsController.Put)
 
 	SMTPRoutes := apiRoutes.Group("/smtp").Use(Auth.TokenAuth())
@@ -173,7 +172,7 @@ func apiRoutesRegister(route *gin.RouterGroup) {
 	OIDCRoutes.DELETE("/settings/:id", OIDCController.SettingsDelete)
 	OIDCRoutes.POST("/settings/reorder", OIDCController.SettingsReorder)
 
-	UserRoutes := apiRoutes.Group("/user")
+	UserRoutes := apiRoutes.Group("/user").Use(Auth.TokenAuth())
 	UserRoutes.POST("", UserController.Post)
 	UserRoutes.PUT("", UserController.Put)
 	UserRoutes.DELETE("/:id", UserController.Delete)

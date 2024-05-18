@@ -5,6 +5,7 @@ import (
 	"github.com/iceking2nd/rustdesk-api-server/app/Controllers"
 	"github.com/iceking2nd/rustdesk-api-server/app/Middlewares/Database"
 	"github.com/iceking2nd/rustdesk-api-server/app/Models"
+	"github.com/spf13/viper"
 	"gorm.io/gorm/clause"
 	"net/http"
 )
@@ -45,5 +46,5 @@ func Activate(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	c.JSON(http.StatusNoContent, nil)
+	c.Redirect(http.StatusFound, viper.GetString("API.PublicURL"))
 }

@@ -2,6 +2,7 @@ package Models
 
 import (
 	"fmt"
+	"github.com/iceking2nd/rustdesk-api-server/global"
 	"github.com/spf13/viper"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -28,6 +29,9 @@ func Init() *gorm.DB {
 		} else {
 			dbSQL.SetMaxIdleConns(5)
 			dbSQL.SetMaxOpenConns(20)
+			if global.LogLevel >= 5 {
+				return db.Debug()
+			}
 			return db
 		}
 	}

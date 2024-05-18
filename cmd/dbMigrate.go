@@ -5,7 +5,9 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/iceking2nd/rustdesk-api-server/app/Models"
+	"github.com/iceking2nd/rustdesk-api-server/utils/Hash"
 	"log"
 	"os"
 
@@ -25,18 +27,104 @@ var dbMigrateCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		db := Models.Init()
 		if err := db.AutoMigrate(
-			&Models.User{},
-			&Models.Token{},
-			&Models.Tag{},
-			&Models.Address{},
 			&Models.ActivateToken{},
+			&Models.Tag{},
+			&Models.Team{},
+			&Models.User{},
+			&Models.Group{},
+			&Models.Token{},
+			&Models.Address{},
 			&Models.Settings{},
 		); err != nil {
 			log.Fatalln(err.Error())
-		} else {
-			fmt.Println("Database schemas migrated.")
-			os.Exit(0)
 		}
+
+		var count int64 = -1
+		err := db.Model(&Models.Team{}).Count(&count).Error
+		if count <= 0 {
+			db.Create(&Models.Team{
+				GUID:  uuid.New().String(),
+				Name:  "Default",
+				EMail: "Default",
+				Info:  "{}",
+			})
+			count = -1
+		}
+		if err != nil {
+			log.Println(err.Error())
+		} else {
+			fmt.Println("Create default team successfully.")
+		}
+
+		err = db.Model(&Models.Group{}).Count(&count).Error
+		if count <= 0 {
+			var team Models.Team
+			err = db.First(&team).Error
+			if err != nil {
+				log.Println(err.Error())
+			} else {
+				db.Create(&Models.Group{
+					GUID:   uuid.New().String(),
+					TeamID: team.ID,
+					Name:   "Default",
+					Note:   "Default Group",
+					Info:   "{}",
+				})
+			}
+			count = -1
+		}
+		if err != nil {
+			log.Println(err.Error())
+		} else {
+			fmt.Println("Create default group successfully.")
+		}
+
+		err = db.Model(&Models.User{}).Count(&count).Error
+		if count <= 0 {
+			var group Models.Group
+			err = db.First(&group).Error
+			if err != nil {
+				log.Println(err.Error())
+			} else {
+				pwd, _ := Hash.StringToSHA512("test1234")
+				db.Create(&Models.User{
+					GUID:     uuid.New().String(),
+					Username: "admin@example.com",
+					Password: pwd,
+					Name:     "Administrator",
+					GroupID:  group.ID,
+					IsAdmin:  true,
+					Status:   1,
+					Note:     "Default Administrator account",
+					Info:     "{}",
+				})
+			}
+			count = -1
+		}
+		if err != nil {
+			log.Println(err.Error())
+		} else {
+			fmt.Println("Create default administrator account successfully.")
+		}
+
+		err = db.Model(&Models.Settings{}).Count(&count).Error
+		if count <= 0 {
+			db.Create(&Models.Settings{
+				Key:   "LICENSE",
+				Value: "community license",
+			})
+			count = -1
+		}
+
+		if err != nil {
+			log.Println(err.Error())
+		} else {
+			fmt.Println("Create default settings successfully.")
+		}
+
+		fmt.Println("Database schemas migrated.")
+		os.Exit(0)
+
 	},
 }
 

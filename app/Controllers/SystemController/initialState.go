@@ -7,6 +7,7 @@ import (
 	"github.com/iceking2nd/rustdesk-api-server/app/Middlewares/Database"
 	"github.com/iceking2nd/rustdesk-api-server/app/Models"
 	"github.com/iceking2nd/rustdesk-api-server/global"
+	"github.com/tidwall/gjson"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"net/http"
@@ -19,9 +20,11 @@ type InitialStateResponse struct {
 		Name string `json:"name"`
 		Note string `json:"note"`
 		Info struct {
+			EMailVerification      bool `json:"email_verification"`
 			EmailAlarmNotification bool `json:"email_alarm_notification"`
 		} `json:"info"`
-		IsAdmin bool `json:"is_admin"`
+		IsAdmin bool   `json:"is_admin"`
+		EMail   string `json:"email"`
 	} `json:"user"`
 	Team struct {
 		Name  string `json:"name"`
@@ -55,7 +58,22 @@ func InitialState(c *gin.Context) {
 	var token Models.Token
 	db.Preload(clause.Associations).First(&token, "access_token = ?", strings.Split(c.Request.Header.Get("Authorization"), " ")[1])
 	r.User.Name = token.User.Name
+	r.User.Note = token.User.Note
+	r.User.EMail = token.User.Username
 	r.User.IsAdmin = token.User.IsAdmin
+	userInfo := gjson.Parse(token.User.Info)
+	r.User.Info.EMailVerification = func() bool {
+		if userInfo.Get("email_verification").Exists() {
+			return userInfo.Get("email_verification").Bool()
+		}
+		return false
+	}()
+	r.User.Info.EmailAlarmNotification = func() bool {
+		if userInfo.Get("email_alarm_notification").Exists() {
+			return userInfo.Get("email_alarm_notification").Bool()
+		}
+		return false
+	}()
 
 	var settings []Models.Settings
 	err := db.Find(&settings).Error

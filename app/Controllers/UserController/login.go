@@ -43,6 +43,7 @@ type LoginResponseUser struct {
 	Note    string                `json:"note"`
 	Info    LoginResponseUserInfo `json:"info"`
 	IsAdmin bool                  `json:"is_admin"`
+	Email   string                `json:"email"`
 }
 
 type LoginResponseUserInfo struct {
@@ -112,8 +113,9 @@ func Login(c *gin.Context) {
 		TFAType:     "",
 		Secret:      "",
 		User: LoginResponseUser{
-			Name: u.Username,
-			Note: "",
+			Name:  u.Username,
+			Email: u.Username,
+			Note:  "",
 			Info: LoginResponseUserInfo{
 				EmailAlarmNotification: true,
 			},
