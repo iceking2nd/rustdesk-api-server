@@ -63,13 +63,16 @@ var dbMigrateCmd = &cobra.Command{
 			if err != nil {
 				log.Println(err.Error())
 			} else {
-				db.Create(&Models.Group{
-					GUID:   uuid.New().String(),
-					TeamID: team.ID,
-					Name:   "Default",
-					Note:   "Default Group",
-					Info:   "{}",
-				})
+				err = db.Create(&Models.Group{
+					GUID: uuid.New().String(),
+					Team: team,
+					Name: "Default",
+					Note: "Default Group",
+					Info: "{}",
+				}).Error
+				if err != nil {
+					log.Println(err.Error())
+				}
 			}
 			count = -1
 		}

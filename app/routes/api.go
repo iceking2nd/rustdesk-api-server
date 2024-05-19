@@ -115,7 +115,7 @@ func apiRoutesRegister(route *gin.RouterGroup) {
 
 	GroupRoutes := apiRoutes.Group("/group").Use(Auth.TokenAuth())
 	GroupRoutes.POST("", GroupController.Create)
-	GroupRoutes.PUT("", GroupController.GroupPut)
+	GroupRoutes.PUT("", GroupController.Update)
 
 	GroupsRoutes := apiRoutes.Group("/groups").Use(Auth.TokenAuth())
 	GroupsRoutes.GET("", GroupsController.List)
